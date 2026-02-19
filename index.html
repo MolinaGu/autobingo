@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Auto Bingo</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="app">
+        <div class="form" id="form">
+            <div class="label">
+                <label for="colunas">Digite o número de colunas</label>
+                <input type="number" name="colunas" id="colunas" class="input">
+            </div>
+            <div class="label">
+                <label for="linhas">Digite o número de linhas</label>
+                <input type="number" name="linhas" id="linhas" class="input">
+            </div>
+                <a href="#" class="bt" id="enviar">Enviar</a>
+        </div>
+        <div class="grade"></div>
+        <div class="downloadBox hide" id="downloadBox">
+    <input type="number" id="qtdTabelas" placeholder="Quantidade de tabelas">
+    
+    <input type="number" id="porFolha" placeholder="Tabelas por folha">
+
+    <input type="text" id="nomeArquivo" placeholder="Nome do arquivo (sem .pdf)">
+
+    <button id="baixarPdf">Baixar PDF</button>
+</div>
+        <div class="palavras hide" id="palavrasBox">
+    <h3>Digite as palavras (uma por linha)</h3>
+    <textarea id="listaPalavras" rows="8"></textarea>
+    <button id="confirmarPalavras">Criar Bingo</button>
+</div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>
