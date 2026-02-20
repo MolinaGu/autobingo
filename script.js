@@ -381,11 +381,68 @@ function gerarGradeEstilizada(doc, palavras, topo, larguraPagina, alturaArea, co
 
 function gerarTabelaHTML(palavras, corFundo){
 
+    // Página simulando A4
+    const pagina = document.createElement("div");
+    pagina.style.width = "500px";
+    pagina.style.height = "700px";
+    pagina.style.background = corFundo;
+    pagina.style.padding = "15px";
+    pagina.style.boxSizing = "border-box";
+    pagina.style.margin = "20px";
+    pagina.style.boxShadow = "0 10px 25px rgba(0,0,0,0.3)";
+    pagina.style.display = "flex";
+    pagina.style.justifyContent = "center";
+    pagina.style.alignItems = "center";
+
+    // Área branca interna
+    const areaInterna = document.createElement("div");
+    areaInterna.style.background = "#f0f0f0";
+    areaInterna.style.width = "100%";
+    areaInterna.style.height = "100%";
+    areaInterna.style.padding = "20px";
+    areaInterna.style.boxSizing = "border-box";
+    areaInterna.style.display = "flex";
+    areaInterna.style.flexDirection = "column";
+    areaInterna.style.alignItems = "center";
+    areaInterna.style.color="#555";
+
+    // Título
+    const titulo = document.createElement("h1");
+    titulo.innerText = "BINGO";
+    titulo.style.margin = "0";
+    titulo.style.fontSize = "40px";
+    titulo.style.color = "#3c2814";
+
+    // Subtítulo
+    const subtituloInput = document.getElementById("subtituloPdf").value.trim();
+    const subtitulo = document.createElement("div");
+    subtitulo.innerText = subtituloInput || "Bingo show de bola";
+    subtitulo.style.fontSize = "16px";
+    subtitulo.style.marginBottom = "20px";
+    subtitulo.style.color = "#555";
+
+    // Nome/Data
+    const linhaInfo = document.createElement("div");
+    linhaInfo.style.width = "100%";
+    linhaInfo.style.display = "flex";
+    linhaInfo.style.justifyContent = "space-between";
+    linhaInfo.style.marginBottom = "25px";
+    linhaInfo.style.fontSize = "14px";
+    linhaInfo.style.color="#555";
+
+    linhaInfo.innerHTML = `
+        <div>Nome: ________________________</div>
+        <div>Data: ___ / ___ / ______</div>
+    `;
+
+    // Tabela
     const tabela = document.createElement("table");
     tabela.style.borderCollapse = "collapse";
-    tabela.style.margin = "15px";
-    tabela.style.background = corFundo;
-    tabela.style.boxShadow = "0 5px 15px rgba(0,0,0,0.2)";
+    tabela.style.width = "100%";
+    tabela.style.flexGrow = "1";
+    tabela.style.color="#555";
+    tabela.style.tableLayout = "fixed";
+    tabela.style.width = "100%";
 
     let index = 0;
 
@@ -397,18 +454,21 @@ function gerarTabelaHTML(palavras, corFundo){
 
             const celula = document.createElement("td");
 
-            celula.style.border = "1px solid black";
-            celula.style.width = "80px";
-            celula.style.height = "60px";
+            celula.style.border = "1px solid " + corFundo;
             celula.style.textAlign = "center";
             celula.style.verticalAlign = "middle";
-            celula.style.padding = "5px";
             celula.style.fontWeight = "bold";
             celula.style.background = "white";
-            celula.style.color = "black";
+            celula.style.padding = "5px";
 
-            celula.textContent = palavras[index];
+            celula.style.width = (100 / colunasGlobais) + "%";
+            celula.style.height = (100 / linhasGlobais) + "%";
 
+            celula.style.overflow = "hidden";
+            celula.style.wordWrap = "break-word";
+            celula.style.fontSize = "14px";
+
+            celula.innerText = palavras[index];
             linha.appendChild(celula);
             index++;
         }
@@ -416,7 +476,14 @@ function gerarTabelaHTML(palavras, corFundo){
         tabela.appendChild(linha);
     }
 
-    return tabela;
+    areaInterna.appendChild(titulo);
+    areaInterna.appendChild(subtitulo);
+    areaInterna.appendChild(linhaInfo);
+    areaInterna.appendChild(tabela);
+
+    pagina.appendChild(areaInterna);
+
+    return pagina;
 }
 
 function gerarCorAleatoria(){
