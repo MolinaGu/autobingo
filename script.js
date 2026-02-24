@@ -1,15 +1,13 @@
-/* ========================================= */
-/* VARIÁVEIS GLOBAIS */
-/* ========================================= */
 let linhasGlobais;
 let colunasGlobais;
 let palavrasGlobais = [];
 
 /* ========================================= */
-/* ELEMENTOS */
+/* ELEMENTOS                                 */
 /* ========================================= */
 const togglePersonalizado = document.getElementById("modeloPersonalizado");
 const toggleMargemResposta = document.getElementById("margemResposta");
+const toggleMostrarNomeData = document.getElementById("mostrarNomeData");
 const inputPorFolha = document.getElementById("porFolha");
 const toggleCores = document.getElementById("coresAleatorias");
 const inputCor = document.getElementById("corFundo");
@@ -18,9 +16,10 @@ const btnVisualizar = document.getElementById("btnVisualizar");
 const btnFechar = document.getElementById("btnFechar");
 const botaoPdf = document.getElementById("baixarPdf");
 const areaVisualizacao = document.getElementById("areaVisualizacao");
+const botaoImagem = document.getElementById("baixarImagem");
 
 /* ========================================= */
-/* ESTADO INICIAL */
+/* ESTADO INICIAL                            */
 /* ========================================= */
 function aplicarEstadoInicial(){
     togglePersonalizado.checked = false;
@@ -38,11 +37,14 @@ function aplicarEstadoInicial(){
     toggleMargemResposta.checked = false;
     toggleMargemResposta.disabled = true;
     toggleMargemResposta.parentElement.style.opacity = "0.5";
+    toggleMostrarNomeData.checked = true;
+    toggleMostrarNomeData.disabled = true;
+    toggleMostrarNomeData.parentElement.style.opacity = "0.5";
 }
 aplicarEstadoInicial();
 
 /* ========================================= */
-/* CRIAR GRADE */
+/* CRIAR GRADE                               */
 /* ========================================= */
 function criarGrade(){
     linhasGlobais = parseInt(document.getElementById("linhas").value);
@@ -67,7 +69,7 @@ function criarGrade(){
 }
 
 /* ========================================= */
-/* EVENTOS DE CONFIGURAÇÃO */
+/* EVENTOS DE CONFIGURAÇÃO                   */
 /* ========================================= */
 togglePersonalizado.addEventListener("change", function(){
     let ativo = this.checked;
@@ -81,6 +83,8 @@ togglePersonalizado.addEventListener("change", function(){
     inputCor.style.opacity = (ativo && !toggleCores.checked) ? "1" : "0.5";
     inputSubtitulo.disabled = !ativo;
     inputSubtitulo.style.opacity = ativo ? "1" : "0.5";
+    toggleMostrarNomeData.disabled = !ativo;
+    toggleMostrarNomeData.parentElement.style.opacity = ativo ? "1" : "0.5";
 });
 
 toggleCores.addEventListener("change", function(){
@@ -89,7 +93,7 @@ toggleCores.addEventListener("change", function(){
 });
 
 /* ========================================= */
-/* VISUALIZAÇÃO (COREÇÃO DO ERRO DE FONTE) */
+/* VISUALIZAÇÃO                              */
 /* ========================================= */
 btnVisualizar.addEventListener("click", () => {
     if(!linhasGlobais || !colunasGlobais || palavrasGlobais.length === 0){
@@ -116,7 +120,7 @@ btnVisualizar.addEventListener("click", () => {
         const tabelaHTML = gerarTabelaHTML(palavras, cor);
         areaVisualizacao.appendChild(tabelaHTML);
 
-        // AJUSTE DE FONTE APÓS INSERIR NO DOM
+        
         tabelaHTML.querySelectorAll('.texto-celula').forEach(div => {
             ajustarFonteDinamica(div, div.parentElement);
         });
@@ -178,9 +182,10 @@ botaoPdf.addEventListener("click", function(){
         doc.setFontSize(12);
         doc.setTextColor(0);
         let yInfo = margem + 45;
+        if(toggleMostrarNomeData.checked){
         doc.text("Nome: ________________________", margem + 10, yInfo);
         doc.text("Data: ___/___/______", larguraPagina - 60, yInfo);
-
+}
         let areaTopo = margem + 55;
         let areaAltura = alturaPagina - areaTopo - margem - 10;
         gerarGradeNoPdf(doc, palavras, areaTopo, larguraPagina, areaAltura, corFundo);
@@ -207,12 +212,29 @@ function gerarTabelaHTML(palavras, corFundo) {
     });
 
     interna.innerHTML = `
-        <h1 style="margin:0; font-size:32px; color:#3c2814;">BINGO</h1>
-        <div style="font-size:14px; margin-bottom:10px; color: #555;">${document.getElementById("subtituloPdf").value || "Bingo show de bola"}</div>
-        <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:15px; font-size:12px; color:#555;">
-            <span>Nome: __________</span><span>Data: __/__/__</span>
-        </div>
+    <h1 style="margin:0; font-size:32px; color:#3c2814;">BINGO</h1>
+    <div style="font-size:14px; margin-bottom:10px; color: #555;">
+        ${document.getElementById("subtituloPdf").value || "Bingo show de bola"}
+    </div>
+`;
+if(toggleMostrarNomeData.checked){
+    const info = document.createElement("div");
+    Object.assign(info.style,{
+        width:"100%",
+        display:"flex",
+        justifyContent:"space-between",
+        marginBottom:"15px",
+        fontSize:"12px",
+        color:"#555"
+    });
+
+    info.innerHTML = `
+        <span>Nome: __________</span>
+        <span>Data: __/__/__</span>
     `;
+
+    interna.appendChild(info);
+}
 
 const tabela = document.createElement("table");
 Object.assign(tabela.style, { 
@@ -230,27 +252,38 @@ Object.assign(tabela.style, {
 const td = document.createElement("td");
 Object.assign(td.style, { 
     border: `2px solid ${corFundo}`, 
-    background: "white", 
-    position: "relative", 
-    height: "auto",
-    boxSizing: "border-box" 
+    background: "white",
+    boxSizing: "border-box",
+    padding: "12px",
+    verticalAlign: toggleMargemResposta.checked ? "top" : "middle",
+    textAlign: "center",
+    position: "relative"
 });
             
             const txt = document.createElement("div");
             txt.className = "texto-celula";
             txt.innerText = palavras[index];
             Object.assign(txt.style, { 
-                width: "100%", color: "#555", textAlign: "center", fontWeight: "bold",
-                position: toggleMargemResposta.checked ? "absolute" : "relative",
-                top: toggleMargemResposta.checked ? "15%" : "unset"
-            });
+    width: "100%",
+    color: "#555",
+    fontWeight: "bold",
+    lineHeight: "1.2",
+    marginTop: toggleMargemResposta.checked ? "8px" : "0"
+});
 
             td.appendChild(txt);
-            if (toggleMargemResposta.checked) {
-                const linha = document.createElement("div");
-                Object.assign(linha.style, { position:"absolute", bottom:"15%", left:"10%", width:"80%", height:"1px", background:"#aaa"});
-                td.appendChild(linha);
-            }
+        if (toggleMargemResposta.checked) {
+    const linha = document.createElement("div");
+    Object.assign(linha.style, {
+        position: "absolute",
+        left: "10%",
+        width: "80%",
+        height: "1px",
+        background: "#aaa",
+        bottom: "20%"
+    });
+    td.appendChild(linha);
+}
             tr.appendChild(td);
             index++;
         }
@@ -294,25 +327,56 @@ function gerarGradeNoPdf(doc, palavras, topo, larguraPagina, alturaArea, corBord
 
             doc.setFillColor(255,255,255);
             doc.rect(x, y, larguraCelula, alturaCelula, "F");
+
             doc.setDrawColor(rgbBorda.r, rgbBorda.g, rgbBorda.b);
             doc.setLineWidth(1);
             doc.rect(x, y, larguraCelula, alturaCelula);
 
-            // Ajuste de fonte PDF
-            let fs = 20;
-            doc.setFontSize(fs);
-            while((doc.getTextWidth(texto) > larguraCelula - 5) && fs > 6) {
-                fs -= 1;
+            let margemInterna = 4;
+            let larguraMaxima = larguraCelula - (margemInterna * 2);
+        
+
+            let fs = 18;
+            let linhasTexto;
+
+            while(fs > 6){
                 doc.setFontSize(fs);
+                linhasTexto = doc.splitTextToSize(texto, larguraMaxima);
+
+                let alturaTextoTotal = linhasTexto.length * (fs * 0.45);
+
+                if(alturaTextoTotal < alturaCelula * (toggleMargemResposta.checked ? 0.55 : 0.85)){
+                    break;
+                }
+
+                fs -= 0.5;
             }
 
+            doc.setFontSize(fs);
             doc.setTextColor(0);
+
+            let alturaTextoTotal = linhasTexto.length * (fs * 0.45);
+            let yTexto;
+
             if(toggleMargemResposta.checked){
-                doc.text(texto, x + larguraCelula/2, y + alturaCelula*0.35, { align:"center" });
-                doc.line(x + larguraCelula*0.15, y + alturaCelula*0.75, x + larguraCelula*0.85, y + alturaCelula*0.75);
+                yTexto = y + alturaCelula * 0.15 + (fs * 0.8);
             } else {
-                doc.text(texto, x + larguraCelula/2, y + (alturaCelula/2) + (fs*0.3), { align:"center" });
+                yTexto = y + (alturaCelula / 2) - (alturaTextoTotal / 2) + fs;
             }
+
+            doc.text(linhasTexto, x + larguraCelula/2, yTexto, {
+                align:"center"
+            });
+
+            if(toggleMargemResposta.checked){
+                doc.line(
+                    x + larguraCelula*0.15,
+                    y + alturaCelula*0.75,
+                    x + larguraCelula*0.85,
+                    y + alturaCelula*0.75
+                );
+            }
+
             index++;
         }
     }
@@ -327,3 +391,47 @@ function hexToRgb(hex){
     let bigint = parseInt(hex.replace("#",""),16);
     return { r:(bigint>>16)&255, g:(bigint>>8)&255, b:bigint&255 };
 }
+botaoImagem.addEventListener("click", async function(){
+
+    if(!linhasGlobais || !colunasGlobais || palavrasGlobais.length === 0){
+        alert("Configure a grade primeiro.");
+        return;
+    }
+
+    let quantidade = parseInt(document.getElementById("qtdTabelas").value);
+    if(isNaN(quantidade) || quantidade <= 0){
+        alert("Digite a quantidade de tabelas.");
+        return;
+    }
+
+    let nomeArquivo = document.getElementById("nomeArquivo").value.trim() || "bingo";
+
+    const containerTemp = document.createElement("div");
+    containerTemp.style.position = "absolute";
+    containerTemp.style.left = "-9999px";
+    document.body.appendChild(containerTemp);
+
+    for(let i = 0; i < quantidade; i++){
+
+        let palavras = [...palavrasGlobais].sort(() => Math.random() - 0.5);
+        let cor = togglePersonalizado.checked 
+            ? (toggleCores.checked ? gerarCorAleatoria() : inputCor.value) 
+            : "#d85528";
+
+        const tabela = gerarTabelaHTML(palavras, cor);
+        containerTemp.appendChild(tabela);
+
+        await html2canvas(tabela, {
+            scale: 3, 
+            useCORS: true
+        }).then(canvas => {
+
+            const link = document.createElement("a");
+            link.download = nomeArquivo + "_" + (i+1) + ".png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
+
+    document.body.removeChild(containerTemp);
+});
