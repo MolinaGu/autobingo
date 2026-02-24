@@ -5,6 +5,7 @@
 <title>Gerador de Bingo Profissional</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link rel="stylesheet" href="./style.css">
 </head>
 
@@ -39,6 +40,13 @@
     </label>
     <span class="toggle-label">Adicionar margem para resposta</span>
 </div>
+<div class="toggle-group">
+    <label class="toggle">
+        <input type="checkbox" id="mostrarNomeData">
+        <span class="slider"></span>
+    </label>
+    <span class="toggle-label">Mostrar campo Nome e Data</span>
+</div>
 <br>
 
 <input type="text" id="subtituloPdf" placeholder="Subtítulo do PDF">
@@ -63,7 +71,8 @@
 <br><br>
 <button id="btnVisualizar">Visualizar Grades</button>
 <button id="btnFechar" style="display:none;">Fechar Visualização</button>
-<button id="baixarPdf">Baixar PDF</button>
+<button id="baixarPdf">Baixar como PDF (.pdf)</button>
+<button id="baixarImagem">Baixar como Imagem (.png)</button>
 
 <div id="areaVisualizacao"></div>
 <div id="gradePreview" style="margin-top:20px;"></div>
