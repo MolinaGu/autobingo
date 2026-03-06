@@ -336,7 +336,7 @@ function gerarGradeNoPdf(doc, palavras, topo, larguraPagina, alturaArea, corBord
             let larguraMaxima = larguraCelula - (margemInterna * 2);
         
 
-let fs = 18;
+let fs = 16;
 let linhasTexto;
 
 let areaTextoMax = toggleMargemResposta.checked
@@ -347,7 +347,7 @@ while (fs > 6) {
 
     doc.setFontSize(fs);
 
-    linhasTexto = doc.splitTextToSize(texto, larguraMaxima);
+    linhasTexto = quebrarTextoInteligente(doc, texto, larguraMaxima);
 
     // altura REAL da linha do jsPDF
     let alturaLinha = fs * 0.8;
@@ -466,3 +466,43 @@ botaoImagem.addEventListener("click", async function(){
 
     document.body.removeChild(containerTemp);
 });
+function quebrarTextoInteligente(doc, texto, larguraMax){
+
+    let palavras = texto.split(" ");
+    let linhas = [];
+    let linhaAtual = "";
+
+    palavras.forEach(palavra => {
+
+        let teste = linhaAtual ? linhaAtual + " " + palavra : palavra;
+
+        if(doc.getTextWidth(teste) > larguraMax){
+
+            if(linhaAtual){
+                linhas.push(linhaAtual);
+                linhaAtual = palavra;
+            }else{
+
+                // palavra sozinha maior que a linha
+                // reduz fonte até caber
+                let fs = doc.getFontSize();
+
+                while(doc.getTextWidth(palavra) > larguraMax && fs > 6){
+                    fs -= 0.5;
+                    doc.setFontSize(fs);
+                }
+
+                linhas.push(palavra);
+                linhaAtual = "";
+            }
+
+        }else{
+            linhaAtual = teste;
+        }
+
+    });
+
+    if(linhaAtual) linhas.push(linhaAtual);
+
+    return linhas;
+}
