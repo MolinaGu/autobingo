@@ -262,7 +262,7 @@ Object.assign(td.style, {
             
             const txt = document.createElement("div");
             txt.className = "texto-celula";
-            txt.innerText = palavras[index];
+            txt.innerText = capitalizarPrimeiraLetra(palavras[index]);
             Object.assign(txt.style, { 
     width: "100%",
     color: "#555",
@@ -323,7 +323,7 @@ function gerarGradeNoPdf(doc, palavras, topo, larguraPagina, alturaArea, corBord
         for(let c = 0; c < colunasGlobais; c++){
             let x = 30 + (c * larguraCelula);
             let y = topo + (l * alturaCelula);
-            let texto = palavras[index];
+            let texto = capitalizarPrimeiraLetra(palavras[index]);
 
             doc.setFillColor(255,255,255);
             doc.rect(x, y, larguraCelula, alturaCelula, "F");
@@ -505,4 +505,9 @@ function quebrarTextoInteligente(doc, texto, larguraMax){
     if(linhaAtual) linhas.push(linhaAtual);
 
     return linhas;
+}
+function capitalizarPrimeiraLetra(texto){
+    if(!texto) return texto;
+    texto = texto.trim();
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
