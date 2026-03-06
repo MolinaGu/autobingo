@@ -37,7 +37,7 @@ function aplicarEstadoInicial(){
     toggleMargemResposta.checked = false;
     toggleMargemResposta.disabled = true;
     toggleMargemResposta.parentElement.style.opacity = "0.5";
-    toggleMostrarNomeData.checked = true;
+    toggleMostrarNomeData.checked = false;
     toggleMostrarNomeData.disabled = true;
     toggleMostrarNomeData.parentElement.style.opacity = "0.5";
 }
@@ -336,47 +336,70 @@ function gerarGradeNoPdf(doc, palavras, topo, larguraPagina, alturaArea, corBord
             let larguraMaxima = larguraCelula - (margemInterna * 2);
         
 
-            let fs = 18;
-            let linhasTexto;
+let fs = 18;
+let linhasTexto;
 
-            while(fs > 6){
-                doc.setFontSize(fs);
-                linhasTexto = doc.splitTextToSize(texto, larguraMaxima);
+let areaTextoMax = toggleMargemResposta.checked
+    ? alturaCelula * 0.55
+    : alturaCelula * 0.85;
 
-                let alturaTextoTotal = linhasTexto.length * (fs * 0.45);
+while (fs > 6) {
 
-                if(alturaTextoTotal < alturaCelula * (toggleMargemResposta.checked ? 0.55 : 0.85)){
-                    break;
-                }
+    doc.setFontSize(fs);
 
-                fs -= 0.5;
-            }
+    linhasTexto = doc.splitTextToSize(texto, larguraMaxima);
 
-            doc.setFontSize(fs);
-            doc.setTextColor(0);
+    // altura REAL da linha do jsPDF
+    let alturaLinha = fs * 0.8;
 
-            let alturaTextoTotal = linhasTexto.length * (fs * 0.45);
-            let yTexto;
+    let alturaTextoTotal = linhasTexto.length * alturaLinha;
 
-            if(toggleMargemResposta.checked){
-                yTexto = y + alturaCelula * 0.15 + (fs * 0.8);
-            } else {
-                yTexto = y + (alturaCelula / 2) - (alturaTextoTotal / 2) + fs;
-            }
+    if (alturaTextoTotal <= areaTextoMax) {
+        break;
+    }
 
-            doc.text(linhasTexto, x + larguraCelula/2, yTexto, {
-                align:"center"
-            });
+    fs -= 0.5;
+}
 
-            if(toggleMargemResposta.checked){
-                doc.line(
-                    x + larguraCelula*0.15,
-                    y + alturaCelula*0.75,
-                    x + larguraCelula*0.85,
-                    y + alturaCelula*0.75
-                );
-            }
+doc.setFontSize(fs);
+doc.setTextColor(0);
 
+let alturaLinha = fs * 0.8;
+let alturaTextoTotal = linhasTexto.length * alturaLinha;
+
+let yTexto;
+
+if (toggleMargemResposta.checked) {
+
+    // sempre começa no topo
+    yTexto = y + 6 + fs;
+
+} else {
+
+    // centraliza quando não tem resposta
+    yTexto = y + (alturaCelula / 2) - (alturaTextoTotal / 2) + fs;
+
+}
+
+doc.text(linhasTexto, x + larguraCelula / 2, yTexto, {
+    align: "center",
+    lineHeightFactor: 0.8
+});
+
+
+// linha de resposta
+if (toggleMargemResposta.checked) {
+
+    let yLinha = y + alturaCelula - 10;
+
+    doc.line(
+        x + larguraCelula * 0.15,
+        yLinha,
+        x + larguraCelula * 0.85,
+        yLinha
+    );
+
+}
             index++;
         }
     }
@@ -409,6 +432,7 @@ botaoImagem.addEventListener("click", async function(){
     const containerTemp = document.createElement("div");
     containerTemp.style.position = "absolute";
     containerTemp.style.left = "-9999px";
+    containerTemp.style.top = "0";
     document.body.appendChild(containerTemp);
 
     for(let i = 0; i < quantidade; i++){
@@ -421,16 +445,23 @@ botaoImagem.addEventListener("click", async function(){
         const tabela = gerarTabelaHTML(palavras, cor);
         containerTemp.appendChild(tabela);
 
-        await html2canvas(tabela, {
-            scale: 3, 
-            useCORS: true
-        }).then(canvas => {
-
-            const link = document.createElement("a");
-            link.download = nomeArquivo + "_" + (i+1) + ".png";
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+        // AJUSTAR FONTE IGUAL AO PREVIEW
+        tabela.querySelectorAll('.texto-celula').forEach(div => {
+            ajustarFonteDinamica(div, div.parentElement);
         });
+
+        // esperar o browser renderizar
+        await new Promise(r => setTimeout(r, 50));
+
+        const canvas = await html2canvas(tabela,{
+            scale:3,
+            useCORS:true
+        });
+
+        const link = document.createElement("a");
+        link.download = nomeArquivo + "_" + (i+1) + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
     }
 
     document.body.removeChild(containerTemp);
